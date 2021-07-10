@@ -1,5 +1,4 @@
 import HttpClient from './HttpClient';
-import Logger from '../utils/Logger';
 import { IRegistryInfo } from '../models/IRegistryInfo';
 import { ICaptainDefinition } from '../models/ICaptainDefinition';
 import { IVersionInfo } from '../models/IVersionInfo';
@@ -12,21 +11,16 @@ export default class ApiManager {
     .REACT_APP_DEFAULT_PASSWORD
     ? process.env.REACT_APP_DEFAULT_PASSWORD + ''
     : 'captain42';
+
   private static authToken: string = !!process.env.REACT_APP_IS_DEBUG
-    ? // tslint:disable-next-line: max-line-length
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Im5hbWVzcGFjZSI6ImNhcHRhaW4iLCJ0b2tlblZlcnNpb24iOiI5NmRjM2U1MC00ZDk3LTRkNmItYTIzMS04MmNiZjY0ZTA2NTYifSwiaWF0IjoxNTQ1OTg0MDQwLCJleHAiOjE1ODE5ODQwNDB9.uGJyhb2JYsdw9toyMKX28bLVuB0PhnS2POwEjKpchww'
+    ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Im5hbWVzcGFjZSI6ImNhcHRhaW4iLCJ0b2tlblZlcnNpb24iOiI5NmRjM2U1MC00ZDk3LTRkNmItYTIzMS04MmNiZjY0ZTA2NTYifSwiaWF0IjoxNTQ1OTg0MDQwLCJleHAiOjE1ODE5ODQwNDB9.uGJyhb2JYsdw9toyMKX28bLVuB0PhnS2POwEjKpchww'
     : '';
 
   private http: HttpClient;
 
-  constructor(
-    baseUrl: string,
-    private authTokenSaver: (authToken: string) => Promise<void>,
-  ) {
-    const self = this;
-
-    this.http = new HttpClient(baseUrl, ApiManager.authToken, function () {
-      return self.getAuthToken(ApiManager.lastKnownPassword);
+  constructor(baseUrl: string) {
+    this.http = new HttpClient(baseUrl, ApiManager.authToken, () => {
+      return this.getAuthToken(ApiManager.lastKnownPassword);
     });
   }
 
@@ -66,7 +60,6 @@ export default class ApiManager {
         self.setAuthToken(authTokenFetched);
         return authTokenFetched;
       })
-      .then(self.authTokenSaver)
       .then(function () {
         return authTokenFetched;
       });

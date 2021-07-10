@@ -1,5 +1,4 @@
 import Constants from '../utils/Constants';
-import StorageHelper from '../utils/StorageHelper';
 import { IHashMapGeneric } from '../models/IHashMapGeneric';
 import { IMachine } from '../models/storage/StoredObjects';
 import ApiManager from './ApiManager';
@@ -27,13 +26,6 @@ export default class CliApiManager {
     if (!CliApiManager.instances[hashKey]) {
       CliApiManager.instances[hashKey] = new ApiManager(
         capMachine.baseUrl + Constants.BASE_API_PATH,
-        function (token) {
-          capMachine.authToken = token;
-          if (capMachine.name) {
-            StorageHelper.get().saveMachine(capMachine);
-          }
-          return Promise.resolve();
-        },
       );
     }
 
