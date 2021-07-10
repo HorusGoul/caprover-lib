@@ -1,16 +1,22 @@
 {
   "name": "caprover-lib",
+  "private": false,
   "version": "0.0.1",
   "description": "A library to communicate with CapRover instances",
   "main": "./dist/index.js",
+  "files": [
+    "./dist",
+    "./src"
+  ],
   "scripts": {
     "dev": "concurrently 'yarn build --watch' 'yarn types --watch'",
     "build": "babel ./src -d ./dist --extensions .ts --copy-files",
-    "types": "tsc --declaration --emitDeclarationOnly",
+    "types": "tsc --declaration --emitDeclarationOnly --declarationMap",
     "typecheck": "tsc --noEmit",
     "lint:base": "eslint --ext .js,.json,.ts",
     "lint": "yarn lint:base src",
-    "prepare": "simple-pre-commit"
+    "prepare": "simple-pre-commit",
+    "prepack": "rimraf dist; yarn build && yarn types"
   },
   "repository": {
     "type": "git",
@@ -60,6 +66,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.2",
+    "rimraf": "^3.0.2",
     "simple-pre-commit": "^1.2.1",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.3.5"
