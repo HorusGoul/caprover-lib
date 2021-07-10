@@ -1,6 +1,8 @@
 import ErrorFactory from '../utils/ErrorFactory';
 import Logger from '../utils/Logger';
-import * as Request from 'request-promise';
+import fetch from 'node-fetch';
+import { URLSearchParams } from 'url';
+import FormData from 'form-data';
 
 const TOKEN_HEADER = 'x-captain-auth';
 const NAMESPACE = 'x-namespace';
@@ -130,12 +132,14 @@ export default class HttpClient {
   }
 
   getReq(endpoint: string, variables: any) {
-    const self = this;
-
-    return Request.get(this.baseUrl + endpoint, {
-      headers: self.createHeaders(),
-      qs: variables,
-      json: true,
+    return fetch(this.baseUrl + endpoint, {
+      method: 'GET',
+      headers: {
+        ...this.createHeaders(),
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: new URLSearchParams(variables),
     }).then(function (data) {
       return data;
     });
@@ -146,24 +150,34 @@ export default class HttpClient {
     variables: any,
     method: 'GET' | 'POST' | 'POST_DATA',
   ) {
-    const self = this;
-
     if (method === this.POST_DATA) {
-      return Request.post(this.baseUrl + endpoint, {
-        headers: self.createHeaders(),
-        formData: variables,
-        json: true,
-      }).then(function (data) {
-        return data;
-      });
+      return fetch(this.baseUrl + endpoint, {
+        method: 'POST',
+        headers: {
+          ...this.createHeaders(),
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: new FormData(variables),
+      })
+        .then((data) => data.json())
+        .then(function (data) {
+          return data;
+        });
     }
 
-    return Request.post(this.baseUrl + endpoint, {
-      headers: self.createHeaders(),
-      body: variables,
-      json: true,
-    }).then(function (data) {
-      return data;
-    });
+    return fetch(this.baseUrl + endpoint, {
+      method: 'POST',
+      headers: {
+        ...this.createHeaders(),
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(variables),
+    })
+      .then((data) => data.json())
+      .then(function (data) {
+        return data;
+      });
   }
 }
