@@ -1,26 +1,20 @@
 {
-  "name": "caprover",
-  "version": "2.1.1",
-  "description": "CLI tool for CapRover. See CapRover.com for more details.",
+  "name": "caprover-lib",
+  "version": "0.0.1",
+  "description": "A library to communicate with CapRover instances",
   "main": "./built/commands/caprover.js",
   "scripts": {
-    "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "formatter": "prettier --check ./src/**/*.ts",
-    "formatter-write": "prettier --write ./src/**/*.ts",
-    "build": "npm run tslint && rm -rf ./built && npx tsc && chmod +x ./built -R"
-  },
-  "bin": {
-    "caprover": "./built/commands/caprover.js",
-    "caprover-deploy": "./built/commands/deploy.js",
-    "caprover-list": "./built/commands/list.js",
-    "caprover-login": "./built/commands/login.js",
-    "caprover-logout": "./built/commands/logout.js",
-    "caprover-serversetup": "./built/commands/serversetup.js",
-    "caprover-api": "./built/commands/api.js"
+    "dev": "concurrently 'yarn build --watch' 'yarn types --watch'",
+    "build": "babel ./src -d ./dist --extensions .ts --copy-files",
+    "types": "tsc --declaration --emitDeclarationOnly",
+    "typecheck": "tsc --noEmit",
+    "lint:base": "eslint --ext .js,.json,.ts",
+    "lint": "yarn lint:base src",
+    "prepare": "simple-pre-commit"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/caprover/caprover-cli"
+    "url": "https://github.com/HorusGoul/caprover-lib"
   },
   "keywords": [
     "Docker",
@@ -34,13 +28,15 @@
     "Server",
     "Container"
   ],
-  "author": "Kasra Bigdeli",
+  "contributors": [
+    "Kasra Bigdeli",
+    "Horus Lugo López (https://horus.dev)"
+  ],
   "license": "Apache-2.0",
+  "simple-pre-commit": "yarn typecheck && yarn lint-staged",
   "lint-staged": {
-    "./**/*.{js}": [
-      "co-eslint",
-      "co-prettier --write",
-      "git add"
+    "src/**/*.{ts,js,json}": [
+      "yarn lint:base --fix"
     ]
   },
   "dependencies": {
@@ -55,25 +51,38 @@
     "progress": "^2.0.3",
     "request": "^2.88.0",
     "request-promise": "^4.2.5",
-    "typescript": "^3.5.3",
     "update-notifier": "^3.0.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.14.5",
+    "@babel/core": "^7.14.6",
+    "@babel/node": "^7.14.7",
+    "@babel/preset-env": "^7.14.7",
+    "@babel/preset-typescript": "^7.14.5",
+    "@babel/register": "^7.14.5",
     "@types/command-exists": "^1.2.0",
     "@types/configstore": "^4.0.0",
     "@types/fs-extra": "^8.0.0",
     "@types/inquirer": "6.5.0",
     "@types/js-yaml": "^3.12.1",
-    "@types/node": "^12.7.2",
+    "@types/node": "^16.0.1",
     "@types/ora": "^3.2.0",
     "@types/progress": "^2.0.3",
     "@types/request-promise": "^4.1.45",
     "@types/update-notifier": "^2.5.0",
-    "eslint": "^6.2.2",
-    "eslint-plugin-jest": "^22.15.2",
-    "jest": "^24.9.0",
-    "prettier": "^1.19.1",
-    "tslint": "^5.20.1",
-    "typescript": "^3.5.3"
+    "@typescript-eslint/eslint-plugin": "^4.28.2",
+    "@typescript-eslint/parser": "^4.28.2",
+    "concurrently": "^6.2.0",
+    "eslint": "^7.30.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "lint-staged": "^11.0.0",
+    "prettier": "^2.3.2",
+    "simple-pre-commit": "^1.2.1",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.3.5"
+  },
+  "engines": {
+    "node": ">=14"
   }
 }
