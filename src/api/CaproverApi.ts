@@ -1,26 +1,33 @@
+import { ReadStream } from 'fs';
 import HttpClient from './HttpClient';
 import { IRegistryInfo } from '../models/IRegistryInfo';
 import { ICaptainDefinition } from '../models/ICaptainDefinition';
 import { IVersionInfo } from '../models/IVersionInfo';
 import { IAppDef } from '../models/AppDef';
-import * as fs from 'fs-extra';
 import IBuildLogs from '../models/IBuildLogs';
+import Constants from '../utils/Constants';
 
-export default class ApiManager {
-  private static lastKnownPassword: string = process.env
-    .REACT_APP_DEFAULT_PASSWORD
-    ? process.env.REACT_APP_DEFAULT_PASSWORD + ''
-    : 'captain42';
+export interface CaproverApiParams {
+  baseUrl: string;
+  password?: string;
+  debug?: boolean;
+}
 
-  private static authToken: string = !!process.env.REACT_APP_IS_DEBUG
-    ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Im5hbWVzcGFjZSI6ImNhcHRhaW4iLCJ0b2tlblZlcnNpb24iOiI5NmRjM2U1MC00ZDk3LTRkNmItYTIzMS04MmNiZjY0ZTA2NTYifSwiaWF0IjoxNTQ1OTg0MDQwLCJleHAiOjE1ODE5ODQwNDB9.uGJyhb2JYsdw9toyMKX28bLVuB0PhnS2POwEjKpchww'
-    : '';
-
+export class CaproverApi {
+  private authToken: string;
   private http: HttpClient;
 
-  constructor(baseUrl: string) {
-    this.http = new HttpClient(baseUrl, ApiManager.authToken, () => {
-      return this.getAuthToken(ApiManager.lastKnownPassword);
+  constructor({
+    baseUrl,
+    password = Constants.DEFAULT_PASSWORD,
+    debug = false,
+  }: CaproverApiParams) {
+    this.authToken = debug
+      ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Im5hbWVzcGFjZSI6ImNhcHRhaW4iLCJ0b2tlblZlcnNpb24iOiI5NmRjM2U1MC00ZDk3LTRkNmItYTIzMS04MmNiZjY0ZTA2NTYifSwiaWF0IjoxNTQ1OTg0MDQwLCJleHAiOjE1ODE5ODQwNDB9.uGJyhb2JYsdw9toyMKX28bLVuB0PhnS2POwEjKpchww'
+      : '';
+
+    this.http = new HttpClient(baseUrl, this.authToken, () => {
+      return this.getAuthToken(password);
     });
   }
 
@@ -39,25 +46,23 @@ export default class ApiManager {
   }
 
   setAuthToken(authToken: string) {
-    ApiManager.authToken = authToken;
+    this.authToken = authToken;
     this.http.setAuthToken(authToken);
   }
 
-  static isLoggedIn() {
-    return !!ApiManager.authToken;
+  isLoggedIn() {
+    return !!this.authToken;
   }
 
   getAuthToken(password: string) {
     const http = this.http;
-    ApiManager.lastKnownPassword = password;
     let authTokenFetched = '';
 
-    const self = this;
     return Promise.resolve() //
       .then(http.fetch(http.POST, '/login', { password }))
-      .then(function (data) {
+      .then((data) => {
         authTokenFetched = data.token;
-        self.setAuthToken(authTokenFetched);
+        this.setAuthToken(authTokenFetched);
         return authTokenFetched;
       })
       .then(function () {
@@ -115,7 +120,7 @@ export default class ApiManager {
       .then(http.fetch(http.GET, '/user/apps/appData/' + appName, {}));
   }
 
-  uploadAppData(appName: string, file: fs.ReadStream, gitHash: string) {
+  uploadAppData(appName: string, file: ReadStream, gitHash: string) {
     const http = this.http;
     return Promise.resolve() //
       .then(

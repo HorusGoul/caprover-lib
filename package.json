@@ -2,7 +2,7 @@
   "name": "caprover-lib",
   "version": "0.0.1",
   "description": "A library to communicate with CapRover instances",
-  "main": "./built/commands/caprover.js",
+  "main": "./dist/index.js",
   "scripts": {
     "dev": "concurrently 'yarn build --watch' 'yarn types --watch'",
     "build": "babel ./src -d ./dist --extensions .ts --copy-files",
