@@ -1,7 +1,7 @@
 import ErrorFactory from '../utils/ErrorFactory';
 import Logger from '../utils/Logger';
 import fetch from 'node-fetch';
-import { URLSearchParams } from 'url';
+import { URL, URLSearchParams } from 'url';
 import FormData from 'form-data';
 
 const TOKEN_HEADER = 'x-captain-auth';
@@ -132,14 +132,16 @@ export default class HttpClient {
   }
 
   getReq(endpoint: string, variables: any) {
-    return fetch(this.baseUrl + endpoint, {
+    const url = new URL(this.baseUrl + endpoint);
+    url.search = new URLSearchParams(variables).toString();
+
+    return fetch(url.toString(), {
       method: 'GET',
       headers: {
         ...this.createHeaders(),
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      body: new URLSearchParams(variables),
     }).then(function (data) {
       return data;
     });
