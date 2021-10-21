@@ -142,9 +142,11 @@ export default class HttpClient {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-    }).then(function (data) {
-      return data;
-    });
+    })
+      .then((data) => data.json())
+      .then(function (data) {
+        return data;
+      });
   }
 
   postReq(
